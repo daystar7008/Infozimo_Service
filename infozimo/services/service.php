@@ -13,7 +13,58 @@ $app->get('/userTags/remove/:userId/:tagId','removeUserTag');
 $app->get('/info/findByUserId/:userId','getInfoByUserId');
 $app->get('/info/findByTagId/:tagId','getInfoByTagId');
 $app->get('/info/findByUserTag/:userId','getInfoByUserTag');
-$app->get('/info/remove/:userId','removeInfo');
+
+$app->post('/userTags/add', function () use ($app) {
+	$req = $app->request();
+	$json = $req->post('json');
+	$data = json_decode($json, true); // parse the JSON into an assoc. array
+	
+	$request = \Slim\Slim::getInstance()->request();
+	if(is_null($data)){
+		echo '{"response":"0"}';
+	}
+
+	$sql = "call insertUserTag(:userId, :tagId);";
+
+	try {
+		$db = getDB();
+		$stmt = $db->prepare($sql);  
+		$stmt->bindParam("userId", $data['user_id']);
+		$stmt->bindParam("tagId", $data['tag_id']);
+		$stmt->execute();
+		$db = null;
+		echo '{"response" : "1"}';
+	} catch(PDOException $e) {
+		//error_log($e->getMessage(), 3, '/var/tmp/php.log');
+		echo '{"response":"0" , "error":{"text":'. $e->getMessage() .'}}'; 
+	}
+});
+
+$app->post('/userTags/remove/:userId/:tagId', function () use ($app) {
+	$req = $app->request();
+	$json = $req->post('json');
+	$data = json_decode($json, true); // parse the JSON into an assoc. array
+	
+	$request = \Slim\Slim::getInstance()->request();
+	if(is_null($data)){
+		echo '{"response":"0"}';
+	}
+
+	$sql = "call deleteUserTag(:userId, :tagId);";
+
+	try {
+		$db = getDB();
+		$stmt = $db->prepare($sql);  
+		$stmt->bindParam("userId", $data['user_id']);
+		$stmt->bindParam("tagId", $data['tag_id']);
+		$stmt->execute();
+		$db = null;
+		echo '{"response" : "1"}';
+	} catch(PDOException $e) {
+		//error_log($e->getMessage(), 3, '/var/tmp/php.log');
+		echo '{"response":"0" , "error":{"text":'. $e->getMessage() .'}}'; 
+	}
+});
 
 $app->post('/info/add', function () use ($app) {
 	$req = $app->request();
@@ -34,6 +85,31 @@ $app->post('/info/add', function () use ($app) {
 		$stmt->bindParam("tagId", $data['tag_id']);
 		$stmt->bindParam("tagDesc", $data['tag_desc']);
 		$stmt->bindParam("picture", $data['picture']);
+		$stmt->execute();
+		$db = null;
+		echo '{"response" : "1"}';
+	} catch(PDOException $e) {
+		//error_log($e->getMessage(), 3, '/var/tmp/php.log');
+		echo '{"response":"0" , "error":{"text":'. $e->getMessage() .'}}'; 
+	}
+});
+
+$app->post('/info/remove/', function () use ($app) {
+	$req = $app->request();
+	$json = $req->post('json');
+	$data = json_decode($json, true); // parse the JSON into an assoc. array
+	
+	$request = \Slim\Slim::getInstance()->request();
+	if(is_null($data)){
+		echo '{"response":"0"}';
+	}
+
+	$sql = "call deleteInfo(:infoId);";
+
+	try {
+		$db = getDB();
+		$stmt = $db->prepare($sql);  
+		$stmt->bindParam("infoId", $data['info_id']);
 		$stmt->execute();
 		$db = null;
 		echo '{"response" : "1"}';
