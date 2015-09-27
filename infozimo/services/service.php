@@ -5,14 +5,21 @@ require 'Slim/Slim.php';
 
 $app = new \Slim\Slim();
 
-$app->get('/tags','getTags');
-$app->get('/tags/:tagName','getSimiliarTags');
+$app->get('/tags/:userId','getTags');
+$app->get('/tags/findByTagName/:tagName/:userId','getSimiliarTags');
 $app->get('/userTags/:userId','getUserTags');
 $app->get('/userTags/add/:userId/:tagId','addUserTag');
 $app->get('/userTags/remove/:userId/:tagId','removeUserTag');
 $app->get('/info/findByUserId/:userId','getInfoByUserId');
-$app->get('/info/findByTagId/:tagId','getInfoByTagId');
+$app->get('/info/findByTagId/:tagId/:userId','getInfoByTagId');
 $app->get('/info/findByUserTag/:userId','getInfoByUserTag');
+$app->get('/user/:userId','getUser');
+
+$app->post('/postTest', function () use ($app) {
+	$req = $app->request();
+	$json = $req->post('json');
+	echo $json;
+});
 
 $app->post('/userTags/add', function () use ($app) {
 	$req = $app->request();
@@ -36,11 +43,11 @@ $app->post('/userTags/add', function () use ($app) {
 		echo '{"response" : "1"}';
 	} catch(PDOException $e) {
 		//error_log($e->getMessage(), 3, '/var/tmp/php.log');
-		echo '{"response":"0" , "error":{"text":'. $e->getMessage() .'}}'; 
+		echo '{"response":"0" , "error":{"text":"'. $e->getMessage() .'"}}'; 
 	}
 });
 
-$app->post('/userTags/remove/:userId/:tagId', function () use ($app) {
+$app->post('/userTags/remove', function () use ($app) {
 	$req = $app->request();
 	$json = $req->post('json');
 	$data = json_decode($json, true); // parse the JSON into an assoc. array
@@ -62,7 +69,7 @@ $app->post('/userTags/remove/:userId/:tagId', function () use ($app) {
 		echo '{"response" : "1"}';
 	} catch(PDOException $e) {
 		//error_log($e->getMessage(), 3, '/var/tmp/php.log');
-		echo '{"response":"0" , "error":{"text":'. $e->getMessage() .'}}'; 
+		echo '{"response":"0" , "error":{"text":"'. $e->getMessage() .'"}}'; 
 	}
 });
 
@@ -76,25 +83,43 @@ $app->post('/info/add', function () use ($app) {
 		echo '{"response":"0"}';
 	}
 
-	$sql = "CALL insertInfo(:userId, :tagId, :tagDesc, :picture)";
+	$sql = "CALL insertInfo(:userId, :tagId, :infoDetail, :picture)";
 
+	$picUrl = "/home/rajesh/Downloads/images/";
+	
 	try {
+		$directory = $picUrl . $data['user_id'];
+		if(!file_exists($directory)){
+			mkdir($directory, 0777, true);
+		}
+
+		date_default_timezone_set('Asia/Kolkata'); //<--This will set the timezone to IST
+
+		$picName = date('Y-m-d_H-i-s', time()) . ".jpg";
+		
+		$pic = $data['info_picture'];
+		$picString = base64_decode($pic);
+		$picPath = $directory . "/" . $picName;
+		file_put_contents($picPath, $picString);
+		
 		$db = getDB();
 		$stmt = $db->prepare($sql);  
 		$stmt->bindParam("userId", $data['user_id']);
 		$stmt->bindParam("tagId", $data['tag_id']);
-		$stmt->bindParam("tagDesc", $data['tag_desc']);
-		$stmt->bindParam("picture", $data['picture']);
-		$stmt->execute();
+		$stmt->bindParam("infoDetail", $data['info_detail']);
+		$stmt->bindParam("picture", $picPath);
+		$val = $stmt->execute();
+		$stmt->closeCursor();
 		$db = null;
+
 		echo '{"response" : "1"}';
 	} catch(PDOException $e) {
 		//error_log($e->getMessage(), 3, '/var/tmp/php.log');
-		echo '{"response":"0" , "error":{"text":'. $e->getMessage() .'}}'; 
+		echo '{"response":"0" , "error":{"text":"'. $e->getMessage() .'"}}'; 
 	}
 });
 
-$app->post('/info/remove/', function () use ($app) {
+$app->post('/info/remove', function () use ($app) {
 	$req = $app->request();
 	$json = $req->post('json');
 	$data = json_decode($json, true); // parse the JSON into an assoc. array
@@ -115,7 +140,7 @@ $app->post('/info/remove/', function () use ($app) {
 		echo '{"response" : "1"}';
 	} catch(PDOException $e) {
 		//error_log($e->getMessage(), 3, '/var/tmp/php.log');
-		echo '{"response":"0" , "error":{"text":'. $e->getMessage() .'}}'; 
+		echo '{"response":"0" , "error":{"text":"'. $e->getMessage() .'"}}'; 
 	}
 });
 
@@ -140,7 +165,7 @@ $app->post('/like/add', function () use ($app) {
 		echo '{"response" : "1"}';
 	} catch(PDOException $e) {
 		//error_log($e->getMessage(), 3, '/var/tmp/php.log');
-		echo '{"response":"0" , "error":{"text":'. $e->getMessage() .'}}'; 
+		echo '{"response":"0" , "error":{"text":"'. $e->getMessage() .'"}}'; 
 	}
 });
 
@@ -166,28 +191,57 @@ $app->post('/like/remove', function () use ($app) {
 		echo '{"response" : "1"}';
 	} catch(PDOException $e) {
 		//error_log($e->getMessage(), 3, '/var/tmp/php.log');
-		echo '{"response":"0" , "error":{"text":'. $e->getMessage() .'}}'; 
+		echo '{"response":"0" , "error":{"text":"'. $e->getMessage() .'"}}'; 
+	}
+});
+
+$app->post('/user/update', function () use ($app) {
+	$req = $app->request();
+	$json = $req->post('json');
+	$data = json_decode($json, true); // parse the JSON into an assoc. array
+	
+	$request = \Slim\Slim::getInstance()->request();
+	if(is_null($data)){
+		echo '{"response":"0"}';
+	}
+
+	$sql = "CALL updateUser(:userId, :userName, :dob, :gender, :picture)";
+
+	try {
+		$db = getDB();
+		$stmt = $db->prepare($sql);  
+		$stmt->bindParam("userId", $data['user_id']);
+		$stmt->bindParam("userName", $data['user_name']);
+		$stmt->bindParam("dob", $data['dob']);
+		$stmt->bindParam("gender", $data['gender']);
+		$stmt->bindParam("picture", $data['picture']);
+		$stmt->execute();
+		$db = null;
+		echo '{"response" : "1"}';
+	} catch(PDOException $e) {
+		//error_log($e->getMessage(), 3, '/var/tmp/php.log');
+		echo '{"response":"0" , "error":{"text":"'. $e->getMessage() .'"}}'; 
 	}
 });
 
 $app->run();
 
-function getTags() {
-	$sql = "CALL getTags;";
+function getTags($userId) {
+	$sql = "CALL getTags('" . $userId . "');";
 	try {
 		$db = getDB();
-		$stmt = $db->query($sql);  
+		$stmt = $db->query($sql);
 		$tags = $stmt->fetchAll(PDO::FETCH_OBJ);
 		$db = null;
 		echo '{"response":"1" , "tags": ' . json_encode($tags) . '}';
 	} catch(PDOException $e) {
 	    //error_log($e->getMessage(), 3, '/var/tmp/php.log');
-		echo '{"response":"0" , "error":{"text":'. $e->getMessage() .'}}'; 
+		echo '{"response":"0" , "error":{"text":"'. $e->getMessage() .'"}}';
 	}
 }
 
-function getSimiliarTags($tagName) {
-	$sql = "CALL getSimiliarTags('" . $tagName . "');";
+function getSimiliarTags($tagName, $userId) {
+	$sql = "CALL getSimiliarTags('" . $tagName . "', '" . $userId . "');";
 	try {
 		$db = getDB();
 		$stmt = $db->query($sql);  
@@ -196,7 +250,7 @@ function getSimiliarTags($tagName) {
 		echo '{"response":"1" , "tags": ' . json_encode($tags) . '}';
 	} catch(PDOException $e) {
 	    //error_log($e->getMessage(), 3, '/var/tmp/php.log');
-		echo '{"response":"0" , "error":{"text":'. $e->getMessage() .'}}'; 
+		echo '{"response":"0" , "error":{"text":"'. $e->getMessage() .'"}}'; 
 	}
 }
 
@@ -210,7 +264,7 @@ function getUserTags($userId) {
 		echo '{"response":"1" , "tags": ' . json_encode($tags) . '}';
 	} catch(PDOException $e) {
 	    //error_log($e->getMessage(), 3, '/var/tmp/php.log');
-		echo '{"response":"0" , "error":{"text":'. $e->getMessage() .'}}'; 
+		echo '{"response":"0" , "error":{"text":"'. $e->getMessage() .'"}}'; 
 	}
 }
 
@@ -224,12 +278,12 @@ function getInfoByUserId($userId){
 		echo '{"response":"1" , "info": ' . json_encode($info) . '}';
 	} catch(PDOException $e) {
 	    //error_log($e->getMessage(), 3, '/var/tmp/php.log');
-		echo '{"response":"0" , "error":{"text":'. $e->getMessage() .'}}'; 
+		echo '{"response":"0" , "error":{"text":"'. $e->getMessage() .'"}}'; 
 	}
 }
 
-function getInfoByTagId($tagId){
-	$sql = "CALL getInfoByTagId('" . $tagId . "');";
+function getInfoByTagId($tagId, $userId){
+	$sql = "CALL getInfoByTagId('" . $tagId . "', '" . $userId . "');";
 	try {
 		$db = getDB();
 		$stmt = $db->query($sql);  
@@ -238,74 +292,48 @@ function getInfoByTagId($tagId){
 		echo '{"response":"1" , "info": ' . json_encode($info) . '}';
 	} catch(PDOException $e) {
 	    //error_log($e->getMessage(), 3, '/var/tmp/php.log');
-		echo '{"response":"0" , "error":{"text":'. $e->getMessage() .'}}'; 
+		echo '{"response":"0" , "error":{"text":"'. $e->getMessage() .'"}}'; 
 	}
 }
 
 function getInfoByUserTag($userId){
 	$sql = "CALL getInfoByUserTag('" . $userId . "');";
+	
 	try {
 		$db = getDB();
 		$stmt = $db->query($sql);  
-		$info = $stmt->fetchAll(PDO::FETCH_OBJ);
+		$infoList = $stmt->fetchAll(PDO::FETCH_OBJ);
 		$db = null;
-		echo '{"response":"1" , "info": ' . json_encode($info) . '}';
+		
+		foreach($infoList as $info){
+			$imageLoc = $info->info_picture;
+			
+			if($imageLoc != null && file_exists($imageLoc)){
+				$byte_array = file_get_contents($imageLoc);
+				$image = base64_encode($byte_array);
+				$info->picture_bytes = $image;
+			}
+			
+		}
+		
+		echo '{"response":"1" , "info": ' . json_encode($infoList) . '}';
 	} catch(PDOException $e) {
 	    //error_log($e->getMessage(), 3, '/var/tmp/php.log');
-		echo '{"response":"0" , "error":{"text":'. $e->getMessage() .'}}'; 
+		echo '{"response":"0" , "error":{"text":"'. $e->getMessage() .'"}}'; 
 	}
 }
 
-function addUserTag($userId, $tagId) {
-	$request = \Slim\Slim::getInstance()->request();
-	//$body = json_decode($request->getBody());
-	$sql = "call insertUserTag(:userId, :tagId);";
+function getUser($userId) {
+	$sql = "CALL getUser('" . $userId . "');";
 	try {
 		$db = getDB();
-		$stmt = $db->prepare($sql);  
-		$stmt->bindParam("userId", $userId);
-		$stmt->bindParam("tagId", $tagId);
-		$stmt->execute();
+		$stmt = $db->query($sql);  
+		$user = $stmt->fetchAll(PDO::FETCH_OBJ);
 		$db = null;
-		echo '{"response" : "1"}';
+		echo '{"response":"1" , "user": ' . json_encode($user) . '}';
 	} catch(PDOException $e) {
-		//error_log($e->getMessage(), 3, '/var/tmp/php.log');
-		echo '{"response":"0" , "error":{"text":'. $e->getMessage() .'}}'; 
-	}
-}
-
-function removeUserTag($userId, $tagId) {
-	$request = \Slim\Slim::getInstance()->request();
-	$body = json_decode($request->getBody());
-	$sql = "call deleteUserTag(:userId, :tagId);";
-	try {
-		$db = getDB();
-		$stmt = $db->prepare($sql);  
-		$stmt->bindParam("userId", $userId);
-		$stmt->bindParam("tagId", $tagId);
-		$stmt->execute();
-		$db = null;
-		echo '{"response" : "1"}';
-	} catch(PDOException $e) {
-		//error_log($e->getMessage(), 3, '/var/tmp/php.log');
-		echo '{"response":"0" , "error":{"text":'. $e->getMessage() .'}}'; 
-	}
-}
-
-function removeInfo($infoId) {
-	$request = \Slim\Slim::getInstance()->request();
-	$body = json_decode($request->getBody());
-	$sql = "call deleteInfo(:infoId);";
-	try {
-		$db = getDB();
-		$stmt = $db->prepare($sql);  
-		$stmt->bindParam("infoId", $infoId);
-		$stmt->execute();
-		$db = null;
-		echo '{"response" : "1"}';
-	} catch(PDOException $e) {
-		//error_log($e->getMessage(), 3, '/var/tmp/php.log');
-		echo '{"response":"0" , "error":{"text":'. $e->getMessage() .'}}'; 
+	    //error_log($e->getMessage(), 3, '/var/tmp/php.log');
+		echo '{"response":"0" , "error":{"text":"'. $e->getMessage() .'"}}'; 
 	}
 }
 
