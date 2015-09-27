@@ -83,7 +83,8 @@ $app->post('/info/add', function () use ($app) {
 
 	$sql = "CALL insertInfo(:userId, :tagId, :infoDetail, :picture)";
 
-	$picUrl = "/home/rajesh/Downloads/images/";
+	$arr = parse_ini_file("infozimo.ini");
+	$picUrl = $arr['image_post_location'];
 	
 	try {
 		$directory = $picUrl . $data['user_id'];
