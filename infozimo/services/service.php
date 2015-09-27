@@ -8,8 +8,6 @@ $app = new \Slim\Slim();
 $app->get('/tags/:userId','getTags');
 $app->get('/tags/findByTagName/:tagName/:userId','getSimiliarTags');
 $app->get('/userTags/:userId','getUserTags');
-$app->get('/userTags/add/:userId/:tagId','addUserTag');
-$app->get('/userTags/remove/:userId/:tagId','removeUserTag');
 $app->get('/info/findByUserId/:userId','getInfoByUserId');
 $app->get('/info/findByTagId/:tagId/:userId','getInfoByTagId');
 $app->get('/info/findByUserTag/:userId','getInfoByUserTag');
