@@ -8,9 +8,9 @@ $app = new \Slim\Slim();
 $app->get('/tags/:userId','getTags');
 $app->get('/tags/findByTagName/:tagName/:userId','getSimiliarTags');
 $app->get('/userTags/:userId','getUserTags');
-$app->get('/info/findByUserId/:userId','getInfoByUserId');
-$app->get('/info/findByTagId/:tagId/:userId','getInfoByTagId');
-$app->get('/info/findByUserTag/:userId','getInfoByUserTag');
+$app->get('/info/findByUserId/:userId/:startRow','getInfoByUserId');
+$app->get('/info/findByTagId/:tagId/:userId/:startRow','getInfoByTagId');
+$app->get('/info/findByUserTag/:userId/:startRow','getInfoByUserTag');
 $app->get('/user/:userId','getUser');
 
 $app->post('/postTest', function () use ($app) {
@@ -267,8 +267,8 @@ function getUserTags($userId) {
 	}
 }
 
-function getInfoByUserId($userId){
-	$sql = "CALL getInfoByUserId('" . $userId . "');";
+function getInfoByUserId($userId, $startRow){
+	$sql = "CALL getInfoByUserId('" . $userId . "', '" . $startRow . "');";
 	try {
 		$db = getDB();
 		$stmt = $db->query($sql);  
@@ -281,8 +281,8 @@ function getInfoByUserId($userId){
 	}
 }
 
-function getInfoByTagId($tagId, $userId){
-	$sql = "CALL getInfoByTagId('" . $tagId . "', '" . $userId . "');";
+function getInfoByTagId($tagId, $userId, $startRow){
+	$sql = "CALL getInfoByTagId('" . $tagId . "', '" . $userId . "', '" . $startRow . "');";
 	try {
 		$db = getDB();
 		$stmt = $db->query($sql);  
@@ -295,8 +295,8 @@ function getInfoByTagId($tagId, $userId){
 	}
 }
 
-function getInfoByUserTag($userId){
-	$sql = "CALL getInfoByUserTag('" . $userId . "');";
+function getInfoByUserTag($userId, $startRow){
+	$sql = "CALL getInfoByUserTag('" . $userId . "', '" . $startRow . "');";
 	
 	try {
 		$db = getDB();
