@@ -272,9 +272,21 @@ function getInfoByUserId($userId, $startRow){
 	try {
 		$db = getDB();
 		$stmt = $db->query($sql);  
-		$info = $stmt->fetchAll(PDO::FETCH_OBJ);
+		$infoList = $stmt->fetchAll(PDO::FETCH_OBJ);
 		$db = null;
-		echo '{"response":"1" , "info": ' . json_encode($info) . '}';
+		
+		foreach($infoList as $info){
+			$imageLoc = $info->info_picture;
+			
+			if($imageLoc != null && file_exists($imageLoc)){
+				$byte_array = file_get_contents($imageLoc);
+				$image = base64_encode($byte_array);
+				$info->picture_bytes = $image;
+			}
+			
+		}
+		
+		echo '{"response":"1" , "info": ' . json_encode($infoList) . '}';
 	} catch(PDOException $e) {
 	    //error_log($e->getMessage(), 3, '/var/tmp/php.log');
 		echo '{"response":"0" , "error":{"text":"'. $e->getMessage() .'"}}'; 
@@ -286,9 +298,21 @@ function getInfoByTagId($tagId, $userId, $startRow){
 	try {
 		$db = getDB();
 		$stmt = $db->query($sql);  
-		$info = $stmt->fetchAll(PDO::FETCH_OBJ);
+		$infoList = $stmt->fetchAll(PDO::FETCH_OBJ);
 		$db = null;
-		echo '{"response":"1" , "info": ' . json_encode($info) . '}';
+		
+		foreach($infoList as $info){
+			$imageLoc = $info->info_picture;
+			
+			if($imageLoc != null && file_exists($imageLoc)){
+				$byte_array = file_get_contents($imageLoc);
+				$image = base64_encode($byte_array);
+				$info->picture_bytes = $image;
+			}
+			
+		}
+		
+		echo '{"response":"1" , "info": ' . json_encode($infoList) . '}';
 	} catch(PDOException $e) {
 	    //error_log($e->getMessage(), 3, '/var/tmp/php.log');
 		echo '{"response":"0" , "error":{"text":"'. $e->getMessage() .'"}}'; 
