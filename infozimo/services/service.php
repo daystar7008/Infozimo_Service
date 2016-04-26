@@ -12,12 +12,7 @@ $app->get('/info/findByUserId/:userId/:startRow','getInfoByUserId');
 $app->get('/info/findByTagId/:tagId/:userId/:startRow','getInfoByTagId');
 $app->get('/info/findByUserTag/:userId/:startRow','getInfoByUserTag');
 $app->get('/user/:userId','getUser');
-
-$app->post('/postTest', function () use ($app) {
-	$req = $app->request();
-	$json = $req->post('json');
-	echo $json;
-});
+$app->get('/points/:userId','getPoints');
 
 $app->post('/userTags/add', function () use ($app) {
 	$req = $app->request();
@@ -223,6 +218,56 @@ $app->post('/user/update', function () use ($app) {
 	}
 });
 
+$app->post('/points/add', function () use ($app) {
+	$req = $app->request();
+	$json = $req->post('json');
+	$data = json_decode($json, true); // parse the JSON into an assoc. array
+	
+	$request = \Slim\Slim::getInstance()->request();
+	if(is_null($data)){
+		echo '{"response":"0"}';
+	}
+
+	$sql = "CALL updatePoints(:userId, :pointCategory)";
+	try {
+		$db = getDB();
+		$stmt = $db->prepare($sql);  
+		$stmt->bindParam("userId", $data['user_id']);
+		$stmt->bindParam("pointCategory", $data['point_category']);
+		$stmt->execute();
+		$db = null;
+		echo '{"response" : "1"}';
+	} catch(PDOException $e) {
+		//error_log($e->getMessage(), 3, '/var/tmp/php.log');
+		echo '{"response":"0" , "error":{"text":"'. $e->getMessage() .'"}}'; 
+	}
+});
+
+$app->post('/points/redeem', function () use ($app) {
+	$req = $app->request();
+	$json = $req->post('json');
+	$data = json_decode($json, true); // parse the JSON into an assoc. array
+	
+	$request = \Slim\Slim::getInstance()->request();
+	if(is_null($data)){
+		echo '{"response":"0"}';
+	}
+
+	$sql = "CALL redeemPoints(:userId, :newContact)";
+	try {
+		$db = getDB();
+		$stmt = $db->prepare($sql);  
+		$stmt->bindParam("userId", $data['user_id']);
+		$stmt->bindParam("newContact", $data['new_contact']);
+		$stmt->execute();
+		$db = null;
+		echo '{"response" : "1"}';
+	} catch(PDOException $e) {
+		//error_log($e->getMessage(), 3, '/var/tmp/php.log');
+		echo '{"response":"0" , "error":{"text":"'. $e->getMessage() .'"}}'; 
+	}
+});
+
 $app->run();
 
 function getTags($userId) {
@@ -261,6 +306,20 @@ function getUserTags($userId) {
 		$tags = $stmt->fetchAll(PDO::FETCH_OBJ);
 		$db = null;
 		echo '{"response":"1" , "tags": ' . json_encode($tags) . '}';
+	} catch(PDOException $e) {
+	    //error_log($e->getMessage(), 3, '/var/tmp/php.log');
+		echo '{"response":"0" , "error":{"text":"'. $e->getMessage() .'"}}'; 
+	}
+}
+
+function getPoints($userId) {
+	$sql = "CALL getPoints('" . $userId . "');";
+	try {
+		$db = getDB();
+		$stmt = $db->query($sql);  
+		$tags = $stmt->fetchAll(PDO::FETCH_OBJ);
+		$db = null;
+		echo '{"response":"1" , "points": ' . json_encode($tags) . '}';
 	} catch(PDOException $e) {
 	    //error_log($e->getMessage(), 3, '/var/tmp/php.log');
 		echo '{"response":"0" , "error":{"text":"'. $e->getMessage() .'"}}'; 
