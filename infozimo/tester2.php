@@ -1,14 +1,16 @@
 <?php
 header('Content-Type: application/json');
-?>
+
 <html>
 <body>
 
-<form action="services/info/add" method="post">
+<form action="services/like/add" method="post">
 <textarea rows="3" cols="100" name="json">
-{"json_value":"rajesh", "json_value2":"rajesh2"}
+{"user_id":"daystar7008", "info_id":1}
 </textarea>
 <input type="submit">
 </form>
 </body>
 </html>
+
+?>

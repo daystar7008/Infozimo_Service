@@ -1,8 +1,8 @@
 <?php
 function getDB() {
-	$dbhost="127.0.0.1";
-	$dbuser="root";
-	$dbpass="rajesh";
+	$dbhost="localhost";
+	$dbuser="infozimo_user";
+	$dbpass="User@123";
 	$dbname="infozimo_db";
 	$dbConnection = new PDO("mysql:host=$dbhost;dbname=$dbname", $dbuser, $dbpass);	
 	$dbConnection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

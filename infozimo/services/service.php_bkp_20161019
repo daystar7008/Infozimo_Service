@@ -14,19 +14,6 @@ $app->get('/info/findByUserTag/:userId/:startRow','getInfoByUserTag');
 $app->get('/user/:userId','getUser');
 $app->get('/points/:userId','getPoints');
 $app->get('/pic/:userId', 'getPic');
-$app->get('/sendMail/:userId', 'sendMail');
-$app->get('/activate/:userId/:activationCode', 'activate');
-$app->get('/resetPassword/:userId', 'resetPassword');
-$app->get('/userPic/:userId', function ($userId) use ($app) {
-    $arr = parse_ini_file("infozimo.ini");
-    $picUrl = $arr['image_post_location'];
-    $imageLoc = $picUrl . $userId . '/profile_pic.jpg';
-          
-    $app->response()->header('Content-Type', 'content-type: image/jpg');
-    $image = file_get_contents($imageLoc);
-    echo $image;
-          
-});
 
 $app->post('/authenticate', function () use ($app) {
     $req = $app->request();
@@ -40,7 +27,7 @@ $app->post('/authenticate', function () use ($app) {
                
     $userId = $data['user_id'];
     $pwd = $data['pwd'];
-
+               
     $sql = "CALL authenticateUser('" . $userId . "', '" . $pwd . "');";
     try {
         $db = getDB();
@@ -52,7 +39,6 @@ $app->post('/authenticate', function () use ($app) {
         //error_log($e->getMessage(), 3, '/var/tmp/php.log');
         echo '{"response":"0" , "error":{"text":"'. $e->getMessage() .'"}}';
     }
-           
 });
     
 $app->post('/userTags/add', function () use ($app) {
@@ -254,17 +240,9 @@ $app->post('/user/update', function () use ($app) {
         $picName = "profile_pic.jpg";
            
         $pic = $data['picture'];
-        $picPath = "";
-        
-        if(is_null($pic)) {
-           $arr = parse_ini_file("infozimo.ini");
-           $picUrl = $arr['image_post_location'];
-           $picPath = $picUrl . $userId . '/profile_pic.jpg';
-        } else {
-           $picString = base64_decode($pic);
-           $picPath = $directory . "/" . $picName;
-           file_put_contents($picPath, $picString);
-        }
+        $picString = base64_decode($pic);
+        $picPath = $directory . "/" . $picName;
+        file_put_contents($picPath, $picString);
            
 		$db = getDB();
 		$stmt = $db->prepare($sql);  
@@ -504,93 +482,6 @@ function getPic($userId) {
         $byte_array = file_get_contents($imageLoc);
         $image = base64_encode($byte_array);
         echo '{"response":"1" , "pic": "' . $image . '"}';
-    }
-}
-    
-function sendMail($userId) {
-    $to = $userId;
-    $subject = "Account Activation Mail From Infozimo";
-    
-    $randNum = rand(1111111111,9999999999);
-    
-    $sql = "UPDATE info_user SET activation_code='" . $randNum . "' WHERE user_id='" . $userId . "';";
-    try {
-        $db = getDB();
-        $stmt = $db->query($sql);
-        $res = $stmt->fetchAll(PDO::FETCH_OBJ);
-        $db = null;
-        
-        //echo '{"response":"1" , "res": ' . json_encode($res) . '}';
-    } catch(PDOException $e) {
-        //error_log($e->getMessage(), 3, '/var/tmp/php.log');
-        //echo '{"response":"0" , "error":{"text":"'. $e->getMessage() .'"}}';
-    }
-    
-    $message = "<b>Please Click the below Link to activate your Account</b><br/>";
-    $message .= "<a href='http://infozimo.com/application/infozimo/services/activate/" . $userId . "/" . $randNum . "'>activate</a>";
-    
-    $header = "From:info@infozimo.com \r\n";
-    $header .= "MIME-Version: 1.0\r\n";
-    $header .= "Content-type: text/html\r\n";
-    
-    $retval = mail ($to,$subject,$message,$header);
-    
-    if( $retval == true ) {
-        echo '{"response":"1"}';
-    }else {
-        echo '{"response":"0"}';
-    }
-}
-    
-function resetPassword($userId) {
-    $to = $userId;
-    $subject = "Password Reset Mail From Infozimo";
-    
-    $randNum = rand(1111111111,9999999999);
-    
-    $sql = "UPDATE info_user SET pwd='" . $randNum . "' WHERE user_id='" . $userId . "';";
-    try {
-        $db = getDB();
-        $stmt = $db->query($sql);
-        $res = $stmt->fetchAll(PDO::FETCH_OBJ);
-        $db = null;
-        
-        //echo '{"response":"1" , "res": ' . json_encode($res) . '}';
-    } catch(PDOException $e) {
-        //error_log($e->getMessage(), 3, '/var/tmp/php.log');
-        //echo '{"response":"0" , "error":{"text":"'. $e->getMessage() .'"}}';
-    }
-    
-    $message = "<b>Your Password has been reset</b><br/>";
-    $message .= "Your New Password is : " . $randNum. "<br/>";
-    $message .= "<b>You can change your password anytime in Edit Profile Section</b><br/>";
-    $message .= "If you haven't done this, Please write us to info@infozimo.com";
-    
-    $header = "From:info@infozimo.com \r\n";
-    $header .= "MIME-Version: 1.0\r\n";
-    $header .= "Content-type: text/html\r\n";
-    
-    $retval = mail ($to,$subject,$message,$header);
-    
-    if( $retval == true ) {
-        echo '{"response":"1"}';
-    }else {
-        echo '{"response":"0"}';
-    }
-}
-    
-function activate($userId, $activationCode) {
-    $sql = "CALL activateUser('" . $userId . "', '" . $activationCode . "');";
-    try {
-        $db = getDB();
-        $stmt = $db->prepare($sql);
-        $res = $stmt->execute();
-        $db = null;
-        
-        echo 'Successfully Activated';
-    } catch(PDOException $e) {
-        //error_log($e->getMessage(), 3, '/var/tmp/php.log');
-        echo '{"response":"0" , "error":{"text":"Error"}}';
     }
 }
 

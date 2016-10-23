@@ -1,0 +1,38 @@
+[27-Sep-2015 14:48:06 UTC] PHP Fatal error:  Uncaught exception 'InvalidArgumentException' with message 'Route callable must be callable' in /home/raj88/public_html/application/infozimo/services/Slim/Route.php:178
+Stack trace:
+#0 /home/raj88/public_html/application/infozimo/services/Slim/Route.php(107): Slim\Route->setCallable('addUserTag')
+#1 /home/raj88/public_html/application/infozimo/services/Slim/Slim.php(443): Slim\Route->__construct('/userTags/add/:...', 'addUserTag', true)
+#2 /home/raj88/public_html/application/infozimo/services/Slim/Slim.php(473): Slim\Slim->mapRoute(Array)
+#3 /home/raj88/public_html/application/infozimo/services/service.php(11): Slim\Slim->get('/userTags/add/:...', 'addUserTag')
+#4 {main}
+  thrown in /home/raj88/public_html/application/infozimo/services/Slim/Route.php on line 178
+[27-Sep-2015 14:48:33 UTC] PHP Fatal error:  Uncaught exception 'InvalidArgumentException' with message 'Route callable must be callable' in /home/raj88/public_html/application/infozimo/services/Slim/Route.php:178
+Stack trace:
+#0 /home/raj88/public_html/application/infozimo/services/Slim/Route.php(107): Slim\Route->setCallable('addUserTag')
+#1 /home/raj88/public_html/application/infozimo/services/Slim/Slim.php(443): Slim\Route->__construct('/userTags/add/:...', 'addUserTag', true)
+#2 /home/raj88/public_html/application/infozimo/services/Slim/Slim.php(473): Slim\Slim->mapRoute(Array)
+#3 /home/raj88/public_html/application/infozimo/services/service.php(11): Slim\Slim->get('/userTags/add/:...', 'addUserTag')
+#4 {main}
+  thrown in /home/raj88/public_html/application/infozimo/services/Slim/Route.php on line 178
+[27-Sep-2015 14:51:03 UTC] PHP Fatal error:  Uncaught exception 'InvalidArgumentException' with message 'Route callable must be callable' in /home/raj88/public_html/application/infozimo/services/Slim/Route.php:178
+Stack trace:
+#0 /home/raj88/public_html/application/infozimo/services/Slim/Route.php(107): Slim\Route->setCallable('addUserTag')
+#1 /home/raj88/public_html/application/infozimo/services/Slim/Slim.php(443): Slim\Route->__construct('/userTags/add/:...', 'addUserTag', true)
+#2 /home/raj88/public_html/application/infozimo/services/Slim/Slim.php(473): Slim\Slim->mapRoute(Array)
+#3 /home/raj88/public_html/application/infozimo/services/service.php(11): Slim\Slim->get('/userTags/add/:...', 'addUserTag')
+#4 {main}
+  thrown in /home/raj88/public_html/application/infozimo/services/Slim/Route.php on line 178
+[19-Oct-2016 15:57:09 UTC] PHP Fatal error:  Call to a member function picture() on a non-object in /home/raj88/public_html/application/infozimo/services/service.php on line 460
+[19-Oct-2016 15:57:16 UTC] PHP Fatal error:  Call to a member function picture() on a non-object in /home/raj88/public_html/application/infozimo/services/service.php on line 460
+[19-Oct-2016 16:09:34 UTC] PHP Fatal error:  Call to a member function picture() on a non-object in /home/raj88/public_html/application/infozimo/services/service.php on line 466
+[19-Oct-2016 16:10:13 UTC] PHP Fatal error:  Call to undefined method stdClass::picture() in /home/raj88/public_html/application/infozimo/services/service.php on line 466
+[19-Oct-2016 16:10:35 UTC] PHP Fatal error:  Call to undefined method stdClass::picture() in /home/raj88/public_html/application/infozimo/services/service.php on line 466
+[23-Oct-2016 07:09:06 UTC] PHP Fatal error:  Call to undefined method Slim\Slim::test() in /home/raj88/public_html/application/infozimo/services/service.php on line 19
+[23-Oct-2016 07:09:40 UTC] PHP Fatal error:  Call to undefined method Slim\Slim::test() in /home/raj88/public_html/application/infozimo/services/service.php on line 19
+[23-Oct-2016 07:09:43 UTC] PHP Fatal error:  Call to undefined method Slim\Slim::test() in /home/raj88/public_html/application/infozimo/services/service.php on line 19
+[23-Oct-2016 07:25:40 UTC] PHP Fatal error:  Call to a member function body() on a non-object in /home/raj88/public_html/application/infozimo/services/service.php on line 500
+[23-Oct-2016 07:27:11 UTC] PHP Fatal error:  Call to a member function body() on a non-object in /home/raj88/public_html/application/infozimo/services/service.php on line 500
+[23-Oct-2016 07:27:14 UTC] PHP Fatal error:  Call to a member function body() on a non-object in /home/raj88/public_html/application/infozimo/services/service.php on line 500
+[23-Oct-2016 07:32:25 UTC] PHP Fatal error:  Call to a member function body() on a non-object in /home/raj88/public_html/application/infozimo/services/service.php on line 501
+[23-Oct-2016 07:35:58 UTC] PHP Fatal error:  Call to a member function body() on a non-object in /home/raj88/public_html/application/infozimo/services/service.php on line 501
+[23-Oct-2016 07:44:29 UTC] PHP Fatal error:  Call to a member function response() on a non-object in /home/raj88/public_html/application/infozimo/services/service.php on line 503
